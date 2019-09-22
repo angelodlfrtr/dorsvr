@@ -3,8 +3,8 @@ package livemedia
 import (
 	"time"
 
-	gs "github.com/djwackey/dorsvr/groupsock"
-	//"github.com/djwackey/dorsvr/log"
+	gs "github.com/angelodlfrtr/dorsvr/groupsock"
+	//"github.com/angelodlfrtr/dorsvr/log"
 )
 
 type H264FileMediaSubsession struct {

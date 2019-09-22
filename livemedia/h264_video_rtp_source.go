@@ -1,6 +1,6 @@
 package livemedia
 
-import gs "github.com/djwackey/dorsvr/groupsock"
+import gs "github.com/angelodlfrtr/dorsvr/groupsock"
 
 type H264VideoRTPSource struct {
 	MultiFramedRTPSource

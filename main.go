@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	//"github.com/djwackey/dorsvr/auth"
-	"github.com/djwackey/dorsvr/rtspserver"
+	//"github.com/angelodlfrtr/dorsvr/auth"
+	"github.com/angelodlfrtr/dorsvr/rtspserver"
 	"log"
 )
 
