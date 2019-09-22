@@ -58,11 +58,11 @@ func (c *RTSPClientConnection) incomingRequestHandler() {
 		case nil:
 			err = c.handleRequestBytes(buffer, length)
 			if err != nil {
-				log.Error(4, "Failed to handle Request Bytes: %v", err)
+				log.Printf("Failed to handle Request Bytes: %v", err)
 				isclose = true
 			}
 		default:
-			log.Info("default: %v", err)
+			log.Printf("default: %v", err)
 			if err.Error() == "EOF" {
 				isclose = true
 			}
@@ -73,7 +73,7 @@ func (c *RTSPClientConnection) incomingRequestHandler() {
 		}
 	}
 
-	log.Info("disconnected the connection[%s:%s].", c.remoteAddr, c.remotePort)
+	log.Printf("disconnected the connection[%s:%s].", c.remoteAddr, c.remotePort)
 	if c.clientSession != nil {
 		c.clientSession.destroy()
 	}
@@ -86,13 +86,13 @@ func (c *RTSPClientConnection) handleRequestBytes(buffer []byte, length int) err
 
 	reqStr := string(buffer[:length])
 
-	log.Info("Received %d new bytes of request data.", length)
+	log.Printf("Received %d new bytes of request data.", length)
 
 	var existed bool
 	//var clientSession *RTSPClientSession
 	requestString, parseSucceeded := livemedia.ParseRTSPRequestString(reqStr, length)
 	if parseSucceeded {
-		log.Info("Received a complete %s request:\n%s", requestString.CmdName, reqStr)
+		log.Printf("Received a complete %s request:\n%s", requestString.CmdName, reqStr)
 
 		c.currentCSeq = requestString.Cseq
 		c.sessionIDStr = requestString.SessionIDStr
@@ -155,10 +155,10 @@ func (c *RTSPClientConnection) handleRequestBytes(buffer []byte, length int) err
 
 	sendBytes, err := c.socket.Write([]byte(c.responseBuffer))
 	if err != nil {
-		log.Error(4, "failed to send response buffer.%d", sendBytes)
+		log.Printf("failed to send response buffer.%d", sendBytes)
 		return err
 	}
-	log.Info("send response:\n%s", c.responseBuffer)
+	log.Printf("send response:\n%s", c.responseBuffer)
 	return nil
 }
 

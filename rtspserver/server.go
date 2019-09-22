@@ -114,7 +114,7 @@ func (s *RTSPServer) incomingConnectionHandler(l *net.TCPListener) {
 	for {
 		tcpConn, err := l.AcceptTCP()
 		if err != nil {
-			lg.Error(0, "failed to accept client.%s", err.Error())
+			lg.Printf("failed to accept client.%s", err.Error())
 			continue
 		}
 

@@ -111,7 +111,7 @@ func newRTCPInstance(rtcpGS *gs.GroupSock, totSessionBW uint, cname string,
 	OutPacketBufferMaxSize = savedMaxSize
 
 	if rtcp.totSessionBW == 0 {
-		log.Warn("[newRTCPInstance] totSessionBW can't be zero!")
+		log.Printf("[newRTCPInstance] totSessionBW can't be zero!")
 		rtcp.totSessionBW = 1
 	}
 
@@ -150,7 +150,7 @@ func (r *RTCPInstance) incomingReportHandler() {
 	for {
 		readBytes, err := r.netInterface.handleRead(r.inBuf)
 		if err != nil {
-			log.Error(4, "failed to read.%v", err)
+			log.Printf("failed to read.%v", err)
 			break
 		}
 
@@ -158,7 +158,7 @@ func (r *RTCPInstance) incomingReportHandler() {
 
 		r.processIncomingReport(packetSize)
 	}
-	log.Info("incomingReportHandler ending.")
+	log.Printf("incomingReportHandler ending.")
 }
 
 func (r *RTCPInstance) processIncomingReport(packetSize uint) {
@@ -170,7 +170,7 @@ func (r *RTCPInstance) processIncomingReport(packetSize uint) {
 	totPacketSize := IP_UDP_HDR_SIZE + packetSize
 
 	if packetSize < 4 {
-		log.Warn("RTCP Interface packet Size less than 4.")
+		log.Printf("RTCP Interface packet Size less than 4.")
 		return
 	}
 
@@ -178,7 +178,7 @@ func (r *RTCPInstance) processIncomingReport(packetSize uint) {
 	rtcpHdr, _ = gs.Ntohl(packet)
 
 	if (rtcpHdr & 0xE0FE0000) != (0x80000000 | (RTCP_PT_SR << 16)) {
-		log.Warn("rejected bad RTCP packet: header 0x%08x", rtcpHdr)
+		log.Printf("rejected bad RTCP packet: header 0x%08x", rtcpHdr)
 		return
 	}
 
@@ -189,7 +189,7 @@ func (r *RTCPInstance) processIncomingReport(packetSize uint) {
 	for {
 		rc := (rtcpHdr >> 24) & 0x1F
 		pt := (rtcpHdr >> 16) & 0xFF
-		log.Warn("pt: %v", pt)
+		log.Printf("pt: %v", pt)
 		// doesn't count hdr
 		length := uint(4 * (rtcpHdr & 0xFFFF))
 		// skip over the header
@@ -272,7 +272,7 @@ func (r *RTCPInstance) processIncomingReport(packetSize uint) {
 				}
 
 				if pt == RTCP_PT_RR {
-					log.Info("RTCP_PT_RR")
+					log.Printf("RTCP_PT_RR")
 					if r.RRHandlerTask != nil {
 						r.RRHandlerTask.(func())()
 					}
@@ -283,7 +283,7 @@ func (r *RTCPInstance) processIncomingReport(packetSize uint) {
 			}
 
 		case RTCP_PT_BYE:
-			log.Info("RTCP_PT_BYE")
+			log.Printf("RTCP_PT_BYE")
 			callByeHandler = true
 
 			subPacketOk = true
@@ -302,23 +302,23 @@ func (r *RTCPInstance) processIncomingReport(packetSize uint) {
 			packetOk = true
 			break
 		} else if packetSize < 4 {
-			log.Error(4, "extraneous %d bytes at end of RTCP packet!", packetSize)
+			log.Printf("extraneous %d bytes at end of RTCP packet!", packetSize)
 			break
 		}
 
 		rtcpHdr, _ = gs.Ntohl(packet)
 
 		if (rtcpHdr & 0xC0000000) != 0x80000000 {
-			log.Error(4, "bad RTCP subpacket: header 0x%08x", rtcpHdr)
+			log.Printf("bad RTCP subpacket: header 0x%08x", rtcpHdr)
 			break
 		}
 	}
 
 	if !packetOk {
-		log.Warn("rejected bad RTCP subpacket: header 0x%08x", rtcpHdr)
+		log.Printf("rejected bad RTCP subpacket: header 0x%08x", rtcpHdr)
 		return
 	} else {
-		log.Info("validated entire RTCP packet")
+		log.Printf("validated entire RTCP packet")
 	}
 
 	r.onReceive(typeOfPacket, totPacketSize, uint(reportSenderSSRC))
@@ -333,7 +333,7 @@ func (r *RTCPInstance) onReceive(typeOfPacket int, totPacketSize, ssrc uint) {
 }
 
 func (r *RTCPInstance) sendReport() {
-	log.Info("sendReport")
+	log.Printf("sendReport")
 	// Begin by including a SR and/or RR report:
 	r.addReport()
 
@@ -441,7 +441,7 @@ func (r *RTCPInstance) addSR() {
 }
 
 func (r *RTCPInstance) addRR() {
-	log.Info("RTCPInstance::addRR")
+	log.Printf("RTCPInstance::addRR")
 	r.enqueueCommonReportPrefix(RTCP_PT_RR, r.Source.ssrc, 0)
 	r.enqueueCommonReportSuffix()
 }

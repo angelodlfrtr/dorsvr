@@ -8,7 +8,7 @@ import (
 func continueAfterDESCRIBE(c *RTSPClient, resultCode int, resultStr string) {
 	for {
 		if resultCode != 0 {
-			log.Error(4, "Failed to get a SDP description: %s", resultStr)
+			log.Printf("Failed to get a SDP description: %s", resultStr)
 			break
 		}
 
@@ -18,10 +18,10 @@ func continueAfterDESCRIBE(c *RTSPClient, resultCode int, resultStr string) {
 		// Create a media session object from this SDP description
 		scs.Session = livemedia.NewMediaSession(sdpDesc)
 		if scs.Session == nil {
-			log.Error(4, "Failed to create a MediaSession object from the sdp Description.")
+			log.Printf("Failed to create a MediaSession object from the sdp Description.")
 			break
 		} else if !scs.Session.HasSubsessions() {
-			log.Error(4, "This session has no media subsessions (i.e., no \"-m\" lines)")
+			log.Printf("This session has no media subsessions (i.e., no \"-m\" lines)")
 			break
 		}
 
@@ -37,18 +37,18 @@ func continueAfterDESCRIBE(c *RTSPClient, resultCode int, resultStr string) {
 func continueAfterSETUP(c *RTSPClient, resultCode int, resultStr string) {
 	for {
 		if resultCode != 0 {
-			log.Error(4, "Failed to set up the subsession")
+			log.Printf("Failed to set up the subsession")
 			break
 		}
 
 		scs := c.scs
 		scs.Subsession.Sink = NewDummySink(scs.Subsession, c.baseURL)
 		if scs.Subsession.Sink == nil {
-			log.Error(4, "Failed to create a data sink for the subsession.")
+			log.Printf("Failed to create a data sink for the subsession.")
 			break
 		}
 
-		log.Info("Created a data sink for the \"%s/%s\" subsession.",
+		log.Printf("Created a data sink for the \"%s/%s\" subsession.",
 			scs.Subsession.MediumName(), scs.Subsession.CodecName())
 
 		scs.Subsession.MiscPtr = c
@@ -66,11 +66,11 @@ func continueAfterSETUP(c *RTSPClient, resultCode int, resultStr string) {
 func continueAfterPLAY(c *RTSPClient, resultCode int, resultStr string) {
 	for {
 		if resultCode != 0 {
-			log.Error(4, "Failed to start playing session: %s", resultStr)
+			log.Printf("Failed to start playing session: %s", resultStr)
 			break
 		}
 
-		log.Info("Started playing session")
+		log.Printf("Started playing session")
 		return
 	}
 
@@ -79,7 +79,7 @@ func continueAfterPLAY(c *RTSPClient, resultCode int, resultStr string) {
 }
 
 func subsessionByeHandler(subsession *livemedia.MediaSubsession) {
-	log.Info("Received RTCP BYE on subsession.")
+	log.Printf("Received RTCP BYE on subsession.")
 
 	// Now act as if the subsession had closed:
 	subsessionAfterPlaying(subsession)
@@ -95,7 +95,7 @@ func shutdownStream(c *RTSPClient) {
 		c.sendTeardownCommand(c.scs.Session, nil)
 	}
 
-	log.Info("Closing the Stream.")
+	log.Printf("Closing the Stream.")
 }
 
 func setupNextSubSession(c *RTSPClient) {
@@ -103,10 +103,10 @@ func setupNextSubSession(c *RTSPClient) {
 	scs.Subsession = scs.Next()
 	if scs.Subsession != nil {
 		if !scs.Subsession.Initiate() {
-			log.Error(4, "Failed to initiate the subsession.")
+			log.Printf("Failed to initiate the subsession.")
 			setupNextSubSession(c)
 		} else {
-			log.Info("Initiated the \"%s/%s\" subsession (client ports %d-%d)",
+			log.Printf("Initiated the \"%s/%s\" subsession (client ports %d-%d)",
 				scs.Subsession.MediumName(), scs.Subsession.CodecName(),
 				scs.Subsession.ClientPortNum(), scs.Subsession.ClientPortNum()+1)
 			c.sendSetupCommand(scs.Subsession, continueAfterSETUP)
