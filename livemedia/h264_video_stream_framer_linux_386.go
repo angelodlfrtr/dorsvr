@@ -4,7 +4,7 @@ import (
 	"errors"
 	sys "syscall"
 
-	"github.com/djwackey/gitea/log"
+	"log"
 )
 
 const (
@@ -44,7 +44,7 @@ func (p *H264VideoStreamParser) UsingSource() *H264VideoStreamFramer {
 }
 
 func (p *H264VideoStreamParser) parse() (uint, error) {
-	log.Trace("[H264VideoStreamParser] is's parsing h264 file video stream.")
+	log.Println("[H264VideoStreamParser] is's parsing h264 file video stream.")
 
 	var err error
 	// The stream must start with a 0x00000001
@@ -181,7 +181,7 @@ func (p *H264VideoStreamParser) parse() (uint, error) {
 	}
 
 	p.UsingSource().setPresentationTime()
-	log.Trace("\tPresentation Time: %d.%06d", p.UsingSource().presentationTime.Sec,
+	log.Println("\tPresentation Time: %d.%06d", p.UsingSource().presentationTime.Sec,
 		p.UsingSource().presentationTime.Usec)
 
 	thisNALUnitEndsAccessUnit := false // until we learn otherwise
@@ -321,7 +321,7 @@ func (p *H264VideoStreamParser) analyzeSliceHeader(start, end []byte, nalUnitTyp
 	bv.skipBits(8) // forbidden_zero_bit; nal_ref_idc; nal_unit_type
 	firstMBInSlice := bv.getExpGolomb()
 	sliceType := bv.getExpGolomb()
-	log.Trace("firstMBInSlice: %d, sliceType: %d", firstMBInSlice, sliceType)
+	log.Println("firstMBInSlice: %d, sliceType: %d", firstMBInSlice, sliceType)
 	header.picParameterSetID = bv.getExpGolomb()
 
 	if p.separateColourPlaneFlag {
@@ -362,13 +362,13 @@ func (p *H264VideoStreamParser) analyzeSPSData() *seqParameterSet {
 
 	bv.skipBits(8) // forbidden_zero_bit; nal_ref_idc; nal_unit_type
 	profileIdc := bv.getBits(8)
-	log.Trace("profileIdc:%d", profileIdc)
+	log.Println("profileIdc:%d", profileIdc)
 	constraintSetNFlag := bv.getBits(8) // also "reserved_zero_2bits" at end
-	log.Trace("constraintSetNFlag:%d", constraintSetNFlag)
+	log.Println("constraintSetNFlag:%d", constraintSetNFlag)
 	levelIdc := bv.getBits(8)
-	log.Trace("levelIdc:%d", levelIdc)
+	log.Println("levelIdc:%d", levelIdc)
 	seqParameterSetID := bv.getExpGolomb()
-	log.Trace("seqParameterSetID:%d", seqParameterSetID)
+	log.Println("seqParameterSetID:%d", seqParameterSetID)
 	if profileIdc == 100 ||
 		profileIdc == 110 ||
 		profileIdc == 122 ||
@@ -381,7 +381,7 @@ func (p *H264VideoStreamParser) analyzeSPSData() *seqParameterSet {
 		chromaFormatIdc := bv.getExpGolomb()
 		if chromaFormatIdc == 3 {
 			eparateColourPlaneFlag := bv.get1BitBoolean()
-			log.Trace("eparateColourPlaneFlag:%d", eparateColourPlaneFlag)
+			log.Println("eparateColourPlaneFlag:%d", eparateColourPlaneFlag)
 		}
 
 		bv.getExpGolomb() // bit_depth_luma_minus8
@@ -389,7 +389,7 @@ func (p *H264VideoStreamParser) analyzeSPSData() *seqParameterSet {
 		bv.skipBits(1)    // qpprime_y_zero_transform_bypass_flag
 
 		seqScalingMatrixPresentFlag := bv.get1Bit()
-		log.Trace("seqScalingMatrixPresentFlag:%d", seqScalingMatrixPresentFlag)
+		log.Println("seqScalingMatrixPresentFlag:%d", seqScalingMatrixPresentFlag)
 		if seqScalingMatrixPresentFlag != 0 {
 			cond := 12
 			if chromaFormatIdc != 3 {
@@ -420,13 +420,13 @@ func (p *H264VideoStreamParser) analyzeSPSData() *seqParameterSet {
 	}
 
 	log2MaxFrameNumMinus4 := bv.getExpGolomb()
-	log.Trace("log2MaxFrameNumMinus4:%d", log2MaxFrameNumMinus4)
+	log.Println("log2MaxFrameNumMinus4:%d", log2MaxFrameNumMinus4)
 	p.log2MaxFrameNum = log2MaxFrameNumMinus4 + 4
 	picOrderCntType := bv.getExpGolomb()
-	log.Trace("picOrderCntType:%d", picOrderCntType)
+	log.Println("picOrderCntType:%d", picOrderCntType)
 	if picOrderCntType == 0 {
 		log2MaxPicOrderCntLsbMinus4 := bv.getExpGolomb()
-		log.Trace("log2MaxPicOrderCntLsbMinus4:%d", log2MaxPicOrderCntLsbMinus4)
+		log.Println("log2MaxPicOrderCntLsbMinus4:%d", log2MaxPicOrderCntLsbMinus4)
 	} else if picOrderCntType == 1 {
 		bv.skipBits(1)    // delta_pic_order_always_zero_flag
 		bv.getExpGolomb() // offset_for_non_ref_pic
@@ -438,21 +438,21 @@ func (p *H264VideoStreamParser) analyzeSPSData() *seqParameterSet {
 		}
 	}
 	maxNumRefFrames := bv.getExpGolomb()
-	log.Trace("maxNumRefFrames:%d", maxNumRefFrames)
+	log.Println("maxNumRefFrames:%d", maxNumRefFrames)
 	gapsInFrameNumValueAllowedFlag := bv.get1Bit()
-	log.Trace("gapsInFrameNumValueAllowedFlag:%d", gapsInFrameNumValueAllowedFlag)
+	log.Println("gapsInFrameNumValueAllowedFlag:%d", gapsInFrameNumValueAllowedFlag)
 	picWidthInMbsMinus1 := bv.getExpGolomb()
-	log.Trace("picWidthInMbsMinus1:%d", picWidthInMbsMinus1)
+	log.Println("picWidthInMbsMinus1:%d", picWidthInMbsMinus1)
 	picHeightInMapUnitsMinus1 := bv.getExpGolomb()
-	log.Trace("picHeightInMapUnitsMinus1:%d", picHeightInMapUnitsMinus1)
+	log.Println("picHeightInMapUnitsMinus1:%d", picHeightInMapUnitsMinus1)
 	frameMbsOnlyFlag := bv.get1BitBoolean()
-	log.Trace("frameMbsOnlyFlag:%d", frameMbsOnlyFlag)
+	log.Println("frameMbsOnlyFlag:%d", frameMbsOnlyFlag)
 	if !frameMbsOnlyFlag {
 		bv.skipBits(1) // mb_adaptive_frame_field_flag
 	}
 	bv.skipBits(1) // direct_8x8_inference_flag
 	frameCroppingFlag := bv.get1Bit()
-	log.Trace("frameCroppingFlag:%d", frameCroppingFlag)
+	log.Println("frameCroppingFlag:%d", frameCroppingFlag)
 	if frameCroppingFlag != 0 {
 		bv.getExpGolomb() // frame_crop_left_offset
 		bv.getExpGolomb() // frame_crop_right_offset
@@ -461,7 +461,7 @@ func (p *H264VideoStreamParser) analyzeSPSData() *seqParameterSet {
 	}
 
 	vuiParametersPresentFlag := bv.get1Bit()
-	log.Trace("vuiParametersPresentFlag:%d", vuiParametersPresentFlag)
+	log.Println("vuiParametersPresentFlag:%d", vuiParametersPresentFlag)
 
 	var spsData *seqParameterSet
 	if vuiParametersPresentFlag != 0 {

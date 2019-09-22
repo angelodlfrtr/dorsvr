@@ -9,7 +9,7 @@ import (
 	"github.com/djwackey/dorsvr/auth"
 	gs "github.com/djwackey/dorsvr/groupsock"
 	"github.com/djwackey/dorsvr/livemedia"
-	"github.com/djwackey/gitea/log"
+	"log"
 )
 
 const rtspBufferSize = 10000

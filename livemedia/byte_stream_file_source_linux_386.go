@@ -6,7 +6,7 @@ import (
 	"os"
 	sys "syscall"
 
-	"github.com/djwackey/gitea/log"
+	"log"
 )
 
 type ByteStreamFileSource struct {
@@ -57,7 +57,7 @@ func (s *ByteStreamFileSource) doStopGettingFrames() error {
 func (s *ByteStreamFileSource) doReadFromFile() error {
 	frameSize, err := s.fid.Read(s.buffTo)
 	if err != nil {
-		log.Trace("[ByteStreamFileSource::doReadFromFile] Failed to read bytes from file.%s", err.Error())
+		log.Println("[ByteStreamFileSource::doReadFromFile] Failed to read bytes from file.%s", err.Error())
 		s.handleClosure()
 		return err
 	}
